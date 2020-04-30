@@ -25,11 +25,6 @@ if [ -f .env.local ]; then
 fi
 
 
-# FIXME: check MYTHIC_BEASTS_API_KEY and MYTHIC_BEASTS_SECRET are set
-AUTH="$MYTHIC_BEASTS_API_KEY:$MYTHIC_BEASTS_SECRET"
-
-
-
 # Create (identifiable) temporary files
 _mktemp() {
   mktemp "${TMPDIR:-/tmp/}delphyne-XXXXXX"
@@ -71,20 +66,34 @@ check_dependencies() {
 http_request() {
   local method="${1}"
   local url="${API_BASE_PATH}${2}"
-  local useragent="delphyne/${VERSION} curl/${CURL_VERSION}"
+  local body="${3:-}"
 
   tempbody="$(_mktemp)"
   tempheaders="$(_mktemp)"
 
-  # FIXME: how to remove duplication of curl arguments, without running into escaping problems?
-  set +e
-  if [[ "${method}" = "get" ]]; then
-    statuscode="$(curl -s -u "${AUTH}" -A "${useragent}" -H "Accept: ${response_format}" -w "%{http_code}" -o "${tempbody}" -D "${tempheaders}" "${url}")"
-    curlret="${?}"
-  else
-    set -e
-    _exiterr "Unknown request method: ${method}"
+  # Build up the curl command arguments as an array
+  cmd=("${CURL}" '--silent' '--show-error')
+  cmd+=('--request' "${method}")
+  cmd+=('--user' "${basic_auth}")
+  cmd+=('--user-agent' "delphyne/${VERSION} curl/${CURL_VERSION}")
+  if [ -n "${response_format}" ]; then
+    cmd+=('--header' "Accept: ${response_format}")
   fi
+  cmd+=('--write-out' "%{http_code}" '--output' "${tempbody}" '--dump-header' "${tempheaders}")
+
+  # Add request body, if one is given
+  if [ -n "${body}" ]; then
+    if [ -n "${request_format}" ]; then
+      cmd+=('--header' "Content-Type: ${request_format}")
+    fi
+    cmd+=('--data-binary' "${body}")
+  fi
+
+  # Now execute the command we have built up
+  set +e
+  cmd+=("${url}")
+  statuscode="$("${cmd[@]}")"
+  curlret="${?}"
   set -e
 
   if [[ ! "${curlret}" = "0" ]]; then
@@ -147,12 +156,26 @@ command_version() {
   exit 0
 }
 
+set_defaults() {
+  CURL='curl'
+  #MYTHIC_BEASTS_API_KEY=
+  #MYTHIC_BEASTS_SECRET=
+
+  # FIXME: check MYTHIC_BEASTS_API_KEY and MYTHIC_BEASTS_SECRET are set
+  basic_auth="${MYTHIC_BEASTS_API_KEY}:${MYTHIC_BEASTS_SECRET}"
+
+  request_format=
+  response_format=
+}
+
 # Determine OS type
 OSTYPE="$(uname)"
 
 main() {
   # Check for missing dependencies
   check_dependencies
+  
+  set_defaults
 
   case "${1}" in
     get) command_get "${2}";;
