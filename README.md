@@ -2,14 +2,14 @@ Delphyne
 ========
 [![Build Status](https://travis-ci.org/njh/delphyne.svg)](https://travis-ci.org/njh/delphyne)
 
-Delphyne is a command line tool for interacting with the [Mythic Beasts] [DNS API].
+Delphyne is a command line tool written in Bash for interacting with the [Mythic Beasts] [DNS API].
 
 
 Requirements
 ------------
 
-- a modern shell (bash/zsh)
-- [curl]
+- [bash] - the Bourne Again SHell
+- [curl] - command line URL tool
 
 
 Installation
@@ -64,7 +64,8 @@ Contact
 
 
 
-[curl]:           https://curl.haxx.se
+[bash]:           https://www.gnu.org/software/bash/
+[curl]:           https://curl.haxx.se/
 [@njh]:           https://twitter.com/njh
 [Mythic Beasts]:  https://www.mythic-beasts.com/
 [DNS API]:        https://www.mythic-beasts.com/sales/domains/dynamic-dns
