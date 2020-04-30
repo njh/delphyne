@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+#
+# delphyne by @njh
+# With varius functions stolen from dehydrated by lukas2511
+#
+# Source: https://github.com/njh/delphyne
+#
+# This script is licensed under The MIT License (see LICENSE for more information).
+
+set -e
+set -u
+set -o pipefail
+
+VERSION="0.0.1"
+API_BASE_PATH="https://api.mythic-beasts.com/beta/dns"
+
+# Load configuration from .env file, if it exists
+if [ -f .env ]; then
+  # shellcheck disable=SC1091
+  source .env
+fi
+if [ -f .env.local ]; then
+  # shellcheck disable=SC1091
+  source .env.local
+fi
+
+
+# FIXME: check MYTHIC_BEASTS_API_KEY and MYTHIC_BEASTS_SECRET are set
+AUTH="$MYTHIC_BEASTS_API_KEY:$MYTHIC_BEASTS_SECRET"
+
+
+
+# Create (identifiable) temporary files
+_mktemp() {
+  mktemp "${TMPDIR:-/tmp/}delphyne-XXXXXX"
+}
+
+# Different sed version for different os types...
+_sed() {
+  if [[ "${OSTYPE}" = "Linux" || "${OSTYPE:0:5}" = "MINGW" ]]; then
+    sed -r "${@}"
+  else
+    sed -E "${@}"
+  fi
+}
+
+# Print error message and exit with error
+_exiterr() {
+  echo "ERROR: ${1}" >&2
+  exit 1
+}
+
+
+# Check for script dependencies
+check_dependencies() {
+  # just execute some dummy and/or version commands to see if required tools exist and are actually usable
+  _sed "" < /dev/null > /dev/null 2>&1 || _exiterr "This script requires sed with support for extended (modern) regular expressions."
+  command -v mktemp > /dev/null 2>&1 || _exiterr "This script requires mktemp."
+
+  # curl returns with an error code in some ancient versions so we have to catch that
+  set +e
+  CURL_VERSION="$(curl -V 2>&1 | head -n1 | awk '{print $2}')"
+  retcode="$?"
+  set -e
+  if [[ ! "${retcode}" = "0" ]] && [[ ! "${retcode}" = "2" ]]; then
+    _exiterr "This script requires curl."
+  fi
+}
+
+# Send http(s) request with specified method
+http_request() {
+  local method="${1}"
+  local url="${API_BASE_PATH}${2}"
+  local useragent="delphyne/${VERSION} curl/${CURL_VERSION}"
+
+  tempbody="$(_mktemp)"
+  tempheaders="$(_mktemp)"
+
+  # FIXME: how to remove duplication of curl arguments, without running into escaping problems?
+  set +e
+  if [[ "${method}" = "get" ]]; then
+    statuscode="$(curl -s -u "${AUTH}" -A "${useragent}" -H "Accept: ${response_format}" -w "%{http_code}" -o "${tempbody}" -D "${tempheaders}" "${url}")"
+    curlret="${?}"
+  else
+    set -e
+    _exiterr "Unknown request method: ${method}"
+  fi
+  set -e
+
+  if [[ ! "${curlret}" = "0" ]]; then
+    _exiterr "Problem connecting to server (${method} for ${url}; curl returned with ${curlret})"
+  fi
+
+  # FIXME: check that response is in the expected format
+
+  if [[ ! "${statuscode:0:1}" = "2" ]]; then
+    echo "ERROR: An error occurred while making request" >&2
+    echo >&2
+    echo "Response:" >&2
+    cat "${tempheaders}" >&2
+    cat "${tempbody}" >&2
+    echo >&2
+    echo >&2
+    rm -f "${tempbody}"
+    rm -f "${tempheaders}"
+    exit 1
+  fi
+
+  if { true >&4; } 2>/dev/null; then
+    cat "${tempheaders}" >&4
+  fi
+  cat "${tempbody}"
+  rm -f "${tempbody}"
+  rm -f "${tempheaders}"
+}
+
+
+# Usage: delphyne get <zone>
+# Description: Get a DNS zone
+command_get() {
+  echo "Getting zone ${1}" >&2
+  response_format='text/dns'
+  http_request get "/zones/${1}/records"
+}
+
+# Usage: delphyne help
+# Description: Show help text
+command_help() {
+  printf "Usage: %s <command>\n\n" "${0}"
+  echo "Commands:"
+  grep -e '^[[:space:]]*# Usage:' -e '^[[:space:]]*# Description:' -e '^command_.*()[[:space:]]*{' "${0}" | while read -r usage; read -r description; read -r command; do
+    if [[ ! "${usage}" =~ Usage ]] || [[ ! "${description}" =~ Description ]] || [[ ! "${command}" =~ ^command_ ]]; then
+      _exiterr "Error generating help text."
+    fi
+    printf " %-32s %s\n" "${usage##"# Usage: "}" "${description##"# Description: "}"
+  done
+}
+
+# Usage: delphyne version
+# Description: Print version information
+command_version() {
+  echo "Delphyne version: ${VERSION}"
+  echo ""
+  echo "Used software:"
+  [[ -n "${BASH_VERSION:-}" ]] && echo " bash: ${BASH_VERSION}"
+  [[ -n "${ZSH_VERSION:-}" ]] && echo " zsh: ${ZSH_VERSION}"
+  echo " curl: $(curl --version 2>&1 | head -n1 | cut -d" " -f1-2)"
+  exit 0
+}
+
+# Determine OS type
+OSTYPE="$(uname)"
+
+main() {
+  # Check for missing dependencies
+  check_dependencies
+
+  case "${1}" in
+    get) command_get "${2}";;
+    version) command_version;;
+    *) command_help; exit 1;;
+  esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
+then
+  main "${@:-}"
+fi
