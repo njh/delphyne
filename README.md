@@ -1,5 +1,6 @@
 Delphyne
 ========
+[![Build Status](https://travis-ci.org/njh/delphyne.svg)](https://travis-ci.org/njh/delphyne)
 
 Delphyne is a command line tool for interacting with the [Mythic Beasts] [DNS API].
 
