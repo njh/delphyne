@@ -16,8 +16,15 @@ Installation
 ------------
 
 
-Running Commands
-----------------
+Usage
+-----
+
+    Usage: ./delphyne <command>
+
+    Commands:
+     delphyne get <zone>              Get a DNS zone
+     delphyne help                    Show help text
+     delphyne version                 Print version information
 
 
 Authenticating
