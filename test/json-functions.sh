@@ -7,7 +7,7 @@ set +e
 set +u
 
 testCleanJsonSpaces() {
-  input="{ \"foo\": 1,\n  \"bar\": 2  }"
+  input=$'{ "foo": 1,\n  "bar": 2  }'
   assertEquals '{"foo": 1, "bar": 2}' "$(echo "${input}" | clean_json)"
 }
 
