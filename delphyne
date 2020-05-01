@@ -153,6 +153,9 @@ http_request() {
 
   # Build up the curl command arguments as an array
   cmd=("${CURL}" '--silent' '--show-error')
+  if [ -n "${ip_version}" ]; then
+    cmd+=("${ip_version}")
+  fi
   cmd+=('--request' "${method}")
   cmd+=('--user' "${basic_auth}")
   cmd+=('--user-agent' "delphyne/${VERSION} curl/${CURL_VERSION}")
@@ -217,6 +220,19 @@ command_get() {
   http_request get "/zones/${1}/records"
 }
 
+# Usage: delphyne dynamic <hostname>
+# Description: Update hostname to public IP address of this machine
+command_dynamic() {
+  response_format='application/json'
+  ip_version="${ip_version:--4}"
+
+  echo "Dynamic update for ${1}" >&2
+  message="$(http_request post "/dynamic/${1}" | clean_json | get_json_string_value message)"
+  if [ -n "${message}" ]; then
+    echo " => ${message}"
+  fi
+}
+
 # Usage: delphyne help
 # Description: Show help text
 command_help() {
@@ -246,6 +262,8 @@ set_defaults() {
   #MYTHIC_BEASTS_API_KEY=
   #MYTHIC_BEASTS_SECRET=
 
+  ip_version="${ip_version:-}"
+
   # FIXME: check MYTHIC_BEASTS_API_KEY and MYTHIC_BEASTS_SECRET are set
   basic_auth="${MYTHIC_BEASTS_API_KEY}:${MYTHIC_BEASTS_SECRET}"
 
@@ -263,6 +281,7 @@ main() {
   set_defaults
 
   case "${1}" in
+    dynamic) command_dynamic "${2}";;
     get) command_get "${2}";;
     version) command_version;;
     zones) command_zones;;

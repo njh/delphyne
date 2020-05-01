@@ -24,6 +24,7 @@ Usage
     Commands:
      delphyne zones                   List the registered zones
      delphyne get <zone>              Get a DNS zone
+     delphyne dynamic <hostname>      Update hostname to public IP address of this machine
      delphyne help                    Show help text
      delphyne version                 Print version information
 
