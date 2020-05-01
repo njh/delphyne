@@ -33,5 +33,24 @@ testJsonDictValue() {
   assertEquals '"a": 1, "b": 2' "$(echo "${input}" | get_json_dict_value dict)"
 }
 
+testJsonArrayAsLinesSingle() {
+  input='{"items": ["item1"]}'
+  result="$(echo "${input}" | get_json_array_value items | get_json_array_as_lines)"
+  assertEquals 'item1' "${result}"
+}
+
+testJsonArrayAsLinesMultiple() {
+  input='{"items": ["item1","item2","item3"]}'
+  result="$(echo "${input}" | get_json_array_value items | get_json_array_as_lines)"
+  assertEquals $'item1\nitem2\nitem3' "$result"
+}
+
+testJsonArrayAsLinesMultipleWithSpaces() {
+  input='{"items": [ "item1", "item2", "item3" ]}'
+  result="$(echo "${input}" | get_json_array_value items | get_json_array_as_lines)"
+  assertEquals $'item1\nitem2\nitem3' "$result"
+}
+
+
 # shellcheck disable=SC1091
 source "$(command -v shunit2)"

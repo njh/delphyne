@@ -78,6 +78,11 @@ get_json_dict_value() {
   sed -n "${filter}"
 }
 
+# Get array value from json dictionary
+get_json_array_as_lines() {
+  _sed -n $'s/[ \t]*"([^"]*)",?[ \t]*/\\1\\\n/gp'
+}
+
 # Check for script dependencies
 check_dependencies() {
   # just execute some dummy and/or version commands to see if required tools exist and are actually usable
