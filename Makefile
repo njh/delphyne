@@ -1,7 +1,7 @@
 SHELL_FILES=delphyne test/*.sh
 
 test:
-	test/*.sh
+	make -C test test
 	shellcheck --shell=bash $(SHELL_FILES)
 
 .PHONY: test
