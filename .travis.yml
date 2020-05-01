@@ -8,11 +8,11 @@ addons:
   apt:
     packages:
       - shellcheck
-    update: true
+      - shunit2
   homebrew:
     packages:
       - shellcheck
-    update: true
+      - shunit2
 
 script:
   - make test
