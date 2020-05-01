@@ -104,6 +104,44 @@ check_dependencies() {
   fi
 }
 
+display_error() {
+  local headerspath="${1}"
+  local bodypath="${2}"
+  local parsed_error=false
+  local errstr
+
+  # If the response was JSON, try and parse it
+  if grep -iq "Content-Type: *application/json" "${headerspath}"; then
+    # Single error message?
+    errstr="$(clean_json < "${bodypath}" | get_json_string_value error)"
+    if [ -n "${errstr}" ]; then
+      parsed_error=true
+      echo " => ${errstr}" >&2
+    else
+      # Array of error messages?
+      errstr="$(clean_json < "${bodypath}" | get_json_array_value errors)"
+      if [ -n "${errstr}" ]; then
+        parsed_error=true
+        get_json_array_as_lines <<< "${errstr}" | while read -r line; do
+          if [ -n "${line}" ]; then
+            echo " => ${line}" >&2
+          fi
+        done
+      fi
+    fi
+  fi
+
+  # If we failed to parse the error message, display the full response
+  if [ "$parsed_error" = false ] ; then
+    echo " => An error occurred while making request" >&2
+    echo >&2
+    echo "Response:" >&2
+    cat "${headerspath}" >&2
+    cat "${bodypath}" >&2
+    echo >&2
+  fi
+}
+
 # Send http(s) request with specified method
 http_request() {
   local method="${1}"
@@ -145,13 +183,7 @@ http_request() {
   # FIXME: check that response is in the expected format
 
   if [[ ! "${statuscode:0:1}" = "2" ]]; then
-    echo "ERROR: An error occurred while making request" >&2
-    echo >&2
-    echo "Response:" >&2
-    cat "${tempheaders}" >&2
-    cat "${tempbody}" >&2
-    echo >&2
-    echo >&2
+    display_error "${tempheaders}" "${tempbody}"
     rm -f "${tempbody}"
     rm -f "${tempheaders}"
     exit 1

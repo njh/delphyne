@@ -1,0 +1,6 @@
+{
+  "errors": [
+    "Unsupported record type 'xx' (line 18)",
+    "Unsupported record type 'zz' (line 19)"
+  ]
+}
