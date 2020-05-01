@@ -1,4 +1,4 @@
-#!/usr/bin/env shunit2
+#!/usr/bin/env bash
 
 # shellcheck source=delphyne
 source "${BASH_SOURCE%/*}/../delphyne"
@@ -32,3 +32,6 @@ testJsonDictValue() {
   input='{"string": "str", "dict": {"a": 1, "b": 2}}'
   assertEquals '"a": 1, "b": 2' "$(echo "${input}" | get_json_dict_value dict)"
 }
+
+# shellcheck disable=SC1091
+source "$(command -v shunit2)"
