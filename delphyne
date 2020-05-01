@@ -83,6 +83,11 @@ get_json_array_as_lines() {
   _sed -n $'s/[ \t]*"([^"]*)",?[ \t]*/\\1\\\n/gp'
 }
 
+# Delete blank lines
+delete_empty_lines() {
+  _sed $'/^\r?$/d'
+}
+
 # Check for script dependencies
 check_dependencies() {
   # just execute some dummy and/or version commands to see if required tools exist and are actually usable
@@ -160,6 +165,17 @@ http_request() {
   rm -f "${tempheaders}"
 }
 
+display_zones() {
+  clean_json | get_json_array_value zones | get_json_array_as_lines | delete_empty_lines
+}
+
+# Usage: delphyne zones
+# Description: List the registered zones
+command_zones() {
+  echo "Getting zones" >&2
+  response_format='application/json'
+  http_request get "/zones" | display_zones
+}
 
 # Usage: delphyne get <zone>
 # Description: Get a DNS zone
@@ -217,6 +233,7 @@ main() {
   case "${1}" in
     get) command_get "${2}";;
     version) command_version;;
+    zones) command_zones;;
     *) command_help; exit 1;;
   esac
 }

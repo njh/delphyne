@@ -22,6 +22,7 @@ Usage
     Usage: ./delphyne <command>
 
     Commands:
+     delphyne zones                   List the registered zones
      delphyne get <zone>              Get a DNS zone
      delphyne help                    Show help text
      delphyne version                 Print version information
