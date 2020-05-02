@@ -13,6 +13,7 @@ addons:
     packages:
       - shellcheck
       - shunit2
+    update: true
 
 script:
   - make test
