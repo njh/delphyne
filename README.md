@@ -5,21 +5,28 @@ Delphyne
 Delphyne is a command line tool written in Bash for interacting with the [Mythic Beasts] [DNS API].
 
 
-Requirements
+Installation
 ------------
+
+Delphyne has two major dependencies:
 
 - [bash] - the Bourne Again SHell
 - [curl] - command line URL tool
 
+They will typically already be installed on Linux and Mac OS systems.
+If not available on your system, they are widely available in package managers.
 
-Installation
-------------
+To then install delphyne on your system run:
+
+    make install
+
+By default it will be installed to `/usr/local/bin/delphyne`.
 
 
 Usage
 -----
 
-    Usage: ./delphyne <command>
+    Usage: delphyne <command>
 
     Commands:
      delphyne zones                   List the registered zones
