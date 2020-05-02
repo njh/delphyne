@@ -27,6 +27,11 @@ testDisplayErrorNotJson() {
   assertContains '"error": "Access denied"' "${result}"
 }
 
+testDisplayMessage() {
+  result="$(display_message "$(<success.json)" 2>&1)"
+  assertEquals ' => 8 records added' "${result}"
+}
+
 
 # shellcheck disable=SC1091
 source "$(command -v shunit2)"

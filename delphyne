@@ -210,6 +210,13 @@ display_zones() {
   clean_json | get_json_array_value zones | get_json_array_as_lines | delete_empty_lines
 }
 
+display_message() {
+  message="$(echo "${1}" | clean_json | get_json_string_value message)"
+  if [ -n "${message}" ]; then
+    echo " => ${message}" >&2
+  fi
+}
+
 # Usage: delphyne zones
 # Description: List the registered zones
 command_zones() {
@@ -233,10 +240,8 @@ command_dynamic() {
   ip_version="${ip_version:--4}"
 
   echo "Dynamic update for ${1}" >&2
-  message="$(http_request post "/dynamic/${1}" | clean_json | get_json_string_value message)"
-  if [ -n "${message}" ]; then
-    echo " => ${message}"
-  fi
+  result="$(http_request post "/dynamic/${1}")"
+  display_message "${result}"
 }
 
 # Usage: delphyne help
