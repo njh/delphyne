@@ -151,13 +151,19 @@ http_request() {
   tempbody="$(_mktemp)"
   tempheaders="$(_mktemp)"
 
+  if [[ -z "${MYTHIC_BEASTS_API_KEY}" || -z "${MYTHIC_BEASTS_SECRET}" ]]; then
+    echo "Please ensure that MYTHIC_BEASTS_API_KEY and MYTHIC_BEASTS_SECRET are defined." >&2
+    echo "This can be done either as an environment variable, or by defining in a .env file in the working directory." >&2
+    exit 2
+  fi
+
   # Build up the curl command arguments as an array
   cmd=("${CURL}" '--silent' '--show-error')
   if [ -n "${ip_version}" ]; then
     cmd+=("${ip_version}")
   fi
   cmd+=('--request' "${method}")
-  cmd+=('--user' "${basic_auth}")
+  cmd+=('--user' "${MYTHIC_BEASTS_API_KEY}:${MYTHIC_BEASTS_SECRET}")
   cmd+=('--user-agent' "delphyne/${VERSION} curl/${CURL_VERSION}")
   if [ -n "${response_format}" ]; then
     cmd+=('--header' "Accept: ${response_format}")
@@ -258,15 +264,11 @@ command_version() {
 }
 
 set_defaults() {
-  CURL='curl'
-  #MYTHIC_BEASTS_API_KEY=
-  #MYTHIC_BEASTS_SECRET=
+  CURL="${CURL:-curl}"
+  MYTHIC_BEASTS_API_KEY="${MYTHIC_BEASTS_API_KEY:-}"
+  MYTHIC_BEASTS_SECRET="${MYTHIC_BEASTS_SECRET:-}"
 
   ip_version="${ip_version:-}"
-
-  # FIXME: check MYTHIC_BEASTS_API_KEY and MYTHIC_BEASTS_SECRET are set
-  basic_auth="${MYTHIC_BEASTS_API_KEY}:${MYTHIC_BEASTS_SECRET}"
-
   request_format=
   response_format=
 }

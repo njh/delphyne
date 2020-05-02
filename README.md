@@ -39,10 +39,15 @@ Usage
 Authenticating
 --------------
 
+Credentials can be obtained from the [API Keys] section of the [Mythic Beasts] control panel.
+Credentials can be unrestricted, allowing them to manage all zones on your account, or restricted to individual zones, records and record types.
+
 Authentication information is stored in a `.env` file in your working directory.
 
     MYTHIC_BEASTS_API_KEY="xxxx"
     MYTHIC_BEASTS_SECRET="xxxxxxxx"
+
+Alternatively you can define them as environment variables.
 
 
 Why is it called Delphyne?
@@ -78,4 +83,4 @@ Contact
 [@njh]:           https://twitter.com/njh
 [Mythic Beasts]:  https://www.mythic-beasts.com/
 [DNS API]:        https://www.mythic-beasts.com/sales/domains/dynamic-dns
-
+[API Keys]:       https://www.mythic-beasts.com/customer/api-users
