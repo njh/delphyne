@@ -244,6 +244,22 @@ command_dynamic() {
   display_message "${result}"
 }
 
+# Usage: delphyne publish <filename>
+# Description: Replace zone with contents of file
+command_publish() {
+  request_format='text/dns'
+  response_format='application/json'
+
+  for filename in *.zone
+  do
+    zone="${filename/.zone/}"
+    echo "Publishing: $zone" >&2
+    result="$(http_request put "/zones/${zone}/records?exclude-generated" "@${filename}")"
+    display_message "${result}"
+    echo >&2
+  done
+}
+
 # Usage: delphyne help
 # Description: Show help text
 command_help() {
@@ -290,6 +306,7 @@ main() {
   case "${1}" in
     dynamic) command_dynamic "${2}";;
     get) command_get "${2}";;
+    publish) command_publish;;
     version) command_version;;
     zones) command_zones;;
     *) command_help; exit 1;;
