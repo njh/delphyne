@@ -228,9 +228,15 @@ command_zones() {
 # Usage: delphyne get <zone>
 # Description: Get a DNS zone
 command_get() {
-  echo "Getting zone ${1}" >&2
+  local zone="${1:-}"
+  if [ -z "${zone}" ]; then
+    echo "No zone name given." >&2
+    command_help
+  fi
+  
+  echo "Getting zone ${zone}" >&2
   response_format='text/dns'
-  http_request get "/zones/${1}/records"
+  http_request get "/zones/${zone}/records"
 }
 
 # Usage: delphyne dynamic <hostname>
@@ -271,6 +277,8 @@ command_help() {
     fi
     printf " %-32s %s\n" "${usage##"# Usage: "}" "${description##"# Description: "}"
   done
+  
+  exit 1
 }
 
 # Usage: delphyne version
@@ -303,13 +311,14 @@ main() {
   
   set_defaults
 
-  case "${1}" in
-    dynamic) command_dynamic "${2}";;
-    get) command_get "${2}";;
-    publish) command_publish;;
+  local command="${1:-}"; shift
+  case "${command}" in
+    dynamic) command_dynamic "$@";;
+    get) command_get "$@";;
+    publish) command_publish "$@";;
     version) command_version;;
     zones) command_zones;;
-    *) command_help; exit 1;;
+    *) command_help;;
   esac
 }
 
