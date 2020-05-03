@@ -250,20 +250,58 @@ command_dynamic() {
   display_message "${result}"
 }
 
+parse_zone_filename() {
+  local base
+  base="$(basename "${1}")"
+
+  if [[ "${base}" =~ ^([a-z0-9.-]+\.[a-z0-9-]+)\.zone$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+  elif [[ "${base}" =~ ^db\.([a-z0-9.-]+\.[a-z0-9-]+)$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+  else
+    _exiterr "Filename does not contain a valid zone name: ${base}"
+  fi
+}
+
+publish_file() {
+  local filename="${1}"
+  if [ ! -f "$filename" ]; then
+    _exiterr "File does not exist: ${filename}"
+  fi
+
+  zone="$(parse_zone_filename "${filename}")"
+  echo "Publishing: $zone" >&2
+  request_format='text/dns'
+  response_format='application/json'
+  result="$(http_request put "/zones/${zone}/records?exclude-generated" "@${filename}")"
+  display_message "${result}"
+  echo >&2
+}
+
+publish_directory() {
+  local dir="${1}"
+  shopt -s nullglob
+
+  for filename in "${dir}"/*.zone "${dir}"/db.*
+  do
+    publish_file "${filename}"
+  done
+}
+
 # Usage: delphyne publish <filename>
 # Description: Replace zone with contents of file
 command_publish() {
-  request_format='text/dns'
-  response_format='application/json'
-
-  for filename in *.zone
-  do
-    zone="${filename/.zone/}"
-    echo "Publishing: $zone" >&2
-    result="$(http_request put "/zones/${zone}/records?exclude-generated" "@${filename}")"
-    display_message "${result}"
-    echo >&2
-  done
+  if [ "$#" -lt 1 ]; then
+    publish_directory .
+  else
+    for filename in "$@"; do
+      if [ -d "${filename}" ]; then
+        publish_directory "${filename}"
+      else
+        publish_file "${filename}"
+      fi
+    done
+  fi
 }
 
 # Usage: delphyne help
