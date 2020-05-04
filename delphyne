@@ -160,7 +160,7 @@ http_request() {
   # Build up the curl command arguments as an array
   cmd=("${CURL}" '--silent' '--show-error')
   if [ -n "${ip_version}" ]; then
-    cmd+=("${ip_version}")
+    cmd+=("-${ip_version}")
   fi
   cmd+=('--request' "${method}")
   cmd+=('--user' "${MYTHIC_BEASTS_API_KEY}:${MYTHIC_BEASTS_SECRET}")
@@ -243,7 +243,7 @@ command_get() {
 # Description: Update hostname to public IP address of this machine
 command_dynamic() {
   response_format='application/json'
-  ip_version="${ip_version:--4}"
+  ip_version="${ip_version:-4}"
 
   echo "Dynamic update for ${1}" >&2
   result="$(http_request post "/dynamic/${1}")"
@@ -307,7 +307,7 @@ command_publish() {
 # Usage: delphyne help
 # Description: Show help text
 command_help() {
-  printf "Usage: %s <command>\n\n" "${0}"
+  printf "Usage: %s [options] <command>\n\n" "${0}"
   echo "Commands:"
   grep -e '^[[:space:]]*# Usage:' -e '^[[:space:]]*# Description:' -e '^command_.*()[[:space:]]*{' "${0}" | while read -r usage; read -r description; read -r command; do
     if [[ ! "${usage}" =~ Usage ]] || [[ ! "${description}" =~ Description ]] || [[ ! "${command}" =~ ^command_ ]]; then
@@ -316,6 +316,14 @@ command_help() {
     printf " %-32s %s\n" "${usage##"# Usage: "}" "${description##"# Description: "}"
   done
   
+  printf -- "\nOptions:\n"
+  grep -E -e '^[[:space:]]*# PARAM_Usage:' -e '^[[:space:]]*# PARAM_Description:' "${0}" | while read -r usage; read -r description; do
+    if [[ ! "${usage}" =~ Usage ]] || [[ ! "${description}" =~ Description ]]; then
+      _exiterr "Error generating help text."
+    fi
+    printf " %-32s %s\n" "${usage##"# PARAM_Usage: "}" "${description##"# PARAM_Description: "}"
+  done
+
   exit 1
 }
 
@@ -335,7 +343,7 @@ set_defaults() {
   MYTHIC_BEASTS_API_KEY="${MYTHIC_BEASTS_API_KEY:-}"
   MYTHIC_BEASTS_SECRET="${MYTHIC_BEASTS_SECRET:-}"
 
-  ip_version="${ip_version:-}"
+  ip_version=
   request_format=
   response_format=
 }
@@ -349,11 +357,34 @@ main() {
   
   set_defaults
 
-  local command="${1:-}"; shift
-  case "${command}" in
-    dynamic) command_dynamic "$@";;
-    get) command_get "$@";;
-    publish) command_publish "$@";;
+  local params=()
+  while (( "$#" )); do
+    case "$1" in
+      # PARAM_Usage: -4, --ipv4
+      # PARAM_Description: Use IPv4 when talking to the Mythic Beasts API
+      -4|--ipv4)
+        ip_version=4
+        ;;
+      # PARAM_Usage: -6, --ipv6
+      # PARAM_Description: Use IPv6 when talking to the Mythic Beasts API
+      -6|--ipv6)
+        ip_version=6
+        ;;
+      -*)
+        echo "Error: Unsupported flag $1" >&2
+        command_help
+        ;;
+      *) # preserve positional arguments
+        params+=("$1")
+        ;;
+    esac
+    shift
+  done
+
+  case "${params[0]:-}" in
+    dynamic) command_dynamic "${params[@]:1}";;
+    get) command_get "${params[@]:1}";;
+    publish) command_publish "${params[@]:1}";;
     version) command_version;;
     zones) command_zones;;
     *) command_help;;
