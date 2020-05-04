@@ -177,13 +177,24 @@ http_request() {
     fi
     cmd+=('--data-binary' "${body}")
   fi
+  cmd+=("${url}")
+
+  if [[ "${debug}" ]]; then
+    echo "DEBUG: ${cmd[@]}" >&2
+  fi
 
   # Now execute the command we have built up
   set +e
-  cmd+=("${url}")
   statuscode="$("${cmd[@]}")"
   curlret="${?}"
   set -e
+
+  if [[ "${debug}" ]]; then
+    echo >&2
+    cat "${tempheaders}" >&2
+    cat "${tempbody}" >&2
+    echo >&2
+  fi
 
   if [[ ! "${curlret}" = "0" ]]; then
     _exiterr "Problem connecting to server (${method} for ${url}; curl returned with ${curlret})"
@@ -345,6 +356,7 @@ set_defaults() {
   MYTHIC_BEASTS_API_KEY="${MYTHIC_BEASTS_API_KEY:-}"
   MYTHIC_BEASTS_SECRET="${MYTHIC_BEASTS_SECRET:-}"
 
+  debug=
   ip_version=
   request_format=
   response_format=
@@ -362,6 +374,11 @@ main() {
   local params=()
   while (( "$#" )); do
     case "$1" in
+      # PARAM_Usage: -d, --debug
+      # PARAM_Description: Turn on debugging of the HTTP request
+      -d|--debug)
+        debug=1
+        ;;
       # PARAM_Usage: -4, --ipv4
       # PARAM_Description: Use IPv4 when talking to the Mythic Beasts API
       -4|--ipv4)
