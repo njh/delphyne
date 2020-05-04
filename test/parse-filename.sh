@@ -15,11 +15,11 @@ testParseZoneFilenameSimpleDbDot() {
 }
 
 testParseZoneFilenameTooShort() {
-  assertContains "$(parse_zone_filename 'example.zone' 2>&1)" 'Filename does not contain a valid zone name' 
+  assertContains "$(parse_zone_filename 'example.zone' 2>&1)" 'Filename does not contain a valid zone name'
 }
 
 testParseZoneFilenameInvalidCharacters() {
-  assertContains "$(parse_zone_filename 'example_.com.zone' 2>&1)" 'Filename does not contain a valid zone name' 
+  assertContains "$(parse_zone_filename 'example_.com.zone' 2>&1)" 'Filename does not contain a valid zone name'
 }
 
 testParseZoneFilenameRelative() {
