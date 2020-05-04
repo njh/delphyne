@@ -189,13 +189,15 @@ http_request() {
     _exiterr "Problem connecting to server (${method} for ${url}; curl returned with ${curlret})"
   fi
 
-  # FIXME: check that response is in the expected format
-
   if [[ ! "${statuscode:0:1}" = "2" ]]; then
     display_error "${tempheaders}" "${tempbody}"
     rm -f "${tempbody}"
     rm -f "${tempheaders}"
     exit 1
+  fi
+
+  if ! grep -qv "Content-Type: *${response_format}" "${tempheaders}"; then
+    echo "Warning: Content-Type of response was not in the expected format" >&2
   fi
 
   if { true >&4; } 2>/dev/null; then
