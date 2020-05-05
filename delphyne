@@ -180,7 +180,7 @@ http_request() {
   cmd+=("${url}")
 
   if [[ "${debug}" ]]; then
-    echo "DEBUG: ${cmd[@]}" >&2
+    echo 'DEBUG:' "$(printf "'%s' " "${cmd[@]}")" >&2
   fi
 
   # Now execute the command we have built up
