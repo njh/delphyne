@@ -219,6 +219,14 @@ http_request() {
   rm -f "${tempheaders}"
 }
 
+mime_type_for_format() {
+  case "${format}" in
+    json) echo 'application/json';;
+    rfc1035) echo 'text/dns';;
+    *) _exiterr "Unknown DNS record format";;
+  esac
+}
+
 display_zones() {
   clean_json | get_json_array_value zones | get_json_array_as_lines | delete_empty_lines
 }
@@ -248,7 +256,7 @@ command_get() {
   fi
 
   echo "Getting zone ${zone}" >&2
-  response_format='text/dns'
+  response_format="$(mime_type_for_format)";
   http_request get "/zones/${zone}/records"
 }
 
@@ -358,6 +366,7 @@ set_defaults() {
 
   debug=
   ip_version=
+  format=rfc1035
   request_format=
   response_format=
 }
@@ -374,6 +383,16 @@ main() {
   local params=()
   while (( "$#" )); do
     case "$1" in
+      # PARAM_Usage: -j, --json
+      # PARAM_Description: Use JSON file format for DNS records
+      -j|--json)
+        format=json
+        ;;
+      # PARAM_Usage: -r, --rfc1035
+      # PARAM_Description: Use RFC1035 (aka bind) file format
+      -r|--rfc1035)
+        format=rfc1035
+        ;;
       # PARAM_Usage: -d, --debug
       # PARAM_Description: Turn on debugging of the HTTP request
       -d|--debug)
