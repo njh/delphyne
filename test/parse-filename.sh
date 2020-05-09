@@ -10,6 +10,10 @@ testParseZoneFilenameSimpleDotZone() {
   assertEquals 'example.com' "$(parse_zone_filename 'example.com.zone')"
 }
 
+testParseZoneFilenameSimpleDotJSON() {
+  assertEquals 'example.com' "$(parse_zone_filename 'example.com.json')"
+}
+
 testParseZoneFilenameSimpleDbDot() {
   assertEquals 'example.com' "$(parse_zone_filename 'db.example.com')"
 }

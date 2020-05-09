@@ -256,7 +256,7 @@ command_get() {
   fi
 
   echo "Getting zone ${zone}" >&2
-  response_format="$(mime_type_for_format)";
+  response_format="$(mime_type_for_format)"
   http_request get "/zones/${zone}/records"
 }
 
@@ -275,7 +275,7 @@ parse_zone_filename() {
   local base
   base="$(basename "${1}")"
 
-  if [[ "${base}" =~ ^([a-z0-9.-]+\.[a-z0-9-]+)\.zone$ ]]; then
+  if [[ "${base}" =~ ^([a-z0-9.-]+\.[a-z0-9-]+)\.(json|zone)$ ]]; then
     echo "${BASH_REMATCH[1]}"
   elif [[ "${base}" =~ ^db\.([a-z0-9.-]+\.[a-z0-9-]+)$ ]]; then
     echo "${BASH_REMATCH[1]}"
@@ -292,7 +292,14 @@ publish_file() {
 
   zone="$(parse_zone_filename "${filename}")"
   echo "Publishing: $zone" >&2
-  request_format='text/dns'
+
+  # If it ends .json, assume it is a JSON file
+  if [[ "${filename}" =~ \.json$ ]]; then
+    request_format='application/json'
+  else
+    request_format="$(mime_type_for_format)"
+  fi
+
   response_format='application/json'
   result="$(http_request put "/zones/${zone}/records?exclude-generated" "@${filename}")"
   display_message "${result}"
@@ -303,10 +310,20 @@ publish_directory() {
   local dir="${1}"
   shopt -s nullglob
 
-  for filename in "${dir}"/*.zone "${dir}"/db.*
-  do
-    publish_file "${filename}"
-  done
+  local paths
+  case "${format}" in
+    json) paths=("${dir}"/*.json);;
+    rfc1035) paths=("${dir}"/*.zone "${dir}"/db.*);;
+    *) _exiterr "Unknown DNS record format";;
+  esac
+
+  if [ ${#paths[@]} -gt 0 ]; then
+    for filename in "${paths[@]}"; do
+      publish_file "${filename}"
+    done
+  else
+    _exiterr "No zone files found in directory: ${dir}"
+  fi
 }
 
 # Usage: delphyne publish <filename>
