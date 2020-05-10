@@ -326,8 +326,8 @@ publish_directory() {
   fi
 }
 
-# Usage: delphyne publish <filename>
-# Description: Replace zone with contents of file
+# Usage: delphyne publish [<filename>]
+# Description: Replace zone(s) with contents of file(s)
 command_publish() {
   if [ "$#" -lt 1 ]; then
     publish_directory .
@@ -406,7 +406,7 @@ main() {
         format=json
         ;;
       # PARAM_Usage: -r, --rfc1035
-      # PARAM_Description: Use RFC1035 (aka bind) file format
+      # PARAM_Description: Use RFC1035 (aka bind) zone file format
       -r|--rfc1035)
         format=rfc1035
         ;;
