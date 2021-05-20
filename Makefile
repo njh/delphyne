@@ -15,10 +15,10 @@ install:
 
 dist:
 	distdir='$(PACKAGE)-$(VERSION)'; mkdir "$$distdir" || exit 1; \
-	for file in `git ls-files`; do \
+	for file in $(git ls-files); do \
 	  dirname="$$distdir/$$(dirname "$$file")"; \
-	  [[ -d "$$dirname" ]] || mkdir "$$dirname" || exit 1; \
-	  cp -pR $$file $$distdir/$$file || exit 1; \
+	  [ -d "$$dirname" ] || mkdir "$$dirname" || exit 1; \
+	  cp -pR "$$file" "$$distdir/$$file" || exit 1; \
 	done; \
 	tar -zcf $$distdir.tar.gz $$distdir; \
 	rm -fr $$distdir
