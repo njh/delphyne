@@ -3,7 +3,7 @@ language: shell
 jobs:
   include:
     - os: linux
-      dist: trusty
+      dist: focal
     - os: osx
       osx_image: xcode12.5
 
