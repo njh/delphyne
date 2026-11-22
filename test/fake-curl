@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+# Stand-in for curl, used by the tests.
+# Records the requested URL in ${FAKE_CURL_LOG} and returns a successful empty JSON response.
+#
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --output) output="$2"; shift;;
+    --dump-header) headers="$2"; shift;;
+    *) url="$1";;
+  esac
+  shift
+done
+
+echo "${url}" > "${FAKE_CURL_LOG}"
+printf 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n' > "${headers}"
+echo '{}' > "${output}"
+printf '200'
