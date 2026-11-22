@@ -142,6 +142,8 @@ Dynamic update for dsl.example.net
 
 By default, the `dynamic` command will use IPv4 to talk to the Mythic Beasts API and set an `A` record.
 However, if you pass the `-6` option, it will set an `AAAA` IPv6 address instead.
+The `-4` and `-6` options use the IPv4-only and IPv6-only API hostnames (`ipv4.api.mythic-beasts.com` and
+`ipv6.api.mythic-beasts.com`), so the request fails rather than silently using the other protocol.
 
 
 ### Publishing zone records
