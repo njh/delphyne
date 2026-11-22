@@ -263,11 +263,17 @@ command_get() {
 # Usage: delphyne dynamic <hostname>
 # Description: Update hostname to public IP address of this machine
 command_dynamic() {
+  local hostname="${1:-}"
+  if [ -z "${hostname}" ]; then
+    echo "No hostname given." >&2
+    command_help
+  fi
+
   response_format='application/json'
   ip_version="${ip_version:-4}"
 
-  echo "Dynamic update for ${1}" >&2
-  result="$(http_request post "/dynamic/${1}")"
+  echo "Dynamic update for ${hostname}" >&2
+  result="$(http_request post "/dynamic/${hostname}")"
   display_message "${result}"
 }
 
