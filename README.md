@@ -29,23 +29,23 @@ By default it will be installed to `/usr/local/bin/delphyne`.
 Usage
 -----
 
-    Usage: delphyne [options] <command>
-
-    Commands:
-     delphyne zones                   List the registered zones
-     delphyne get <zone>              Get a DNS zone
-     delphyne dynamic <hostname>      Update hostname to public IP address of this machine
-     delphyne publish [<filename>]    Replace zone(s) with contents of file(s)
-     delphyne help                    Show help text
-     delphyne version                 Print version information
-
-    Options:
-     -j, --json                       Use JSON file format for DNS records
-     -r, --rfc1035                    Use RFC1035 (aka bind) zone file format
-     -d, --debug                      Turn on debugging of the HTTP request
-     -a, --all                        Include generated records when getting a zone
-     -4, --ipv4                       Use IPv4 when talking to the Mythic Beasts API
-     -6, --ipv6                       Use IPv6 when talking to the Mythic Beasts API
+	Usage: delphyne [options] <command>
+	
+	Commands:
+	 zones                            List the registered zones
+	 get <zone>                       Get a DNS zone
+	 dynamic <hostname>               Point hostname at this machine's public IP
+	 publish [<file>]                 Replace zone(s) with contents of file(s)
+	 help                             Show help text
+	 version                          Print version information
+	
+	Options:
+	 -j, --json                       Use JSON file format for DNS records
+	 -r, --rfc1035                    Use RFC1035 (aka bind) zone file format
+	 -d, --debug                      Turn on debugging of the HTTP request
+	 -a, --all                        Include generated records when getting a zone
+	 -4, --ipv4                       Only use IPv4 to talk to the API
+	 -6, --ipv6                       Only use IPv6 to talk to the API
 
 
 ### Authenticating

@@ -281,7 +281,7 @@ command_get() {
 }
 
 # Usage: delphyne dynamic <hostname>
-# Description: Update hostname to public IP address of this machine
+# Description: Point hostname at this machine's public IP
 command_dynamic() {
   local hostname="${1:-}"
   if [ -z "${hostname}" ]; then
@@ -352,7 +352,7 @@ publish_directory() {
   fi
 }
 
-# Usage: delphyne publish [<filename>]
+# Usage: delphyne publish [<file>]
 # Description: Replace zone(s) with contents of file(s)
 command_publish() {
   if [ "$#" -lt 1 ]; then
@@ -377,7 +377,7 @@ command_help() {
     if [[ ! "${usage}" =~ Usage ]] || [[ ! "${description}" =~ Description ]] || [[ ! "${command}" =~ ^command_ ]]; then
       _exiterr "Error generating help text."
     fi
-    printf " %-32s %s\n" "${usage##"# Usage: "}" "${description##"# Description: "}"
+    printf " %-32s %s\n" "${usage##"# Usage: delphyne "}" "${description##"# Description: "}"
   done
 
   printf -- "\nOptions:\n"
@@ -448,12 +448,12 @@ main() {
         all_records=1
         ;;
       # PARAM_Usage: -4, --ipv4
-      # PARAM_Description: Use IPv4 when talking to the Mythic Beasts API
+      # PARAM_Description: Only use IPv4 to talk to the API
       -4|--ipv4)
         ip_version=4
         ;;
       # PARAM_Usage: -6, --ipv6
-      # PARAM_Description: Use IPv6 when talking to the Mythic Beasts API
+      # PARAM_Description: Only use IPv6 to talk to the API
       -6|--ipv6)
         ip_version=6
         ;;
