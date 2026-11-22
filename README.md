@@ -63,7 +63,7 @@ Alternatively, you can define them as environment variables.
 
 ### Getting a list of zones
 
-Use the `zone` command to get a list of domains/zones.
+Use the `zones` command to get a list of domains/zones.
 The zone names are displayed with one zone per line.
 
 Example:
