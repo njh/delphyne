@@ -219,7 +219,8 @@ http_request() {
     exit 1
   fi
 
-  if ! grep -qv "Content-Type: *${response_format}" "${tempheaders}"; then
+  # Header names are case-insensitive (and lower case over HTTP/2)
+  if ! grep -qi "Content-Type: *${response_format}" "${tempheaders}"; then
     echo "Warning: Content-Type of response was not in the expected format" >&2
   fi
 
@@ -255,7 +256,7 @@ display_message() {
 command_zones() {
   echo "Getting zones" >&2
   response_format='application/json'
-  http_request get "/zones" | display_zones
+  http_request GET "/zones" | display_zones
 }
 
 # Usage: delphyne get <zone>
@@ -276,7 +277,7 @@ command_get() {
 
   echo "Getting zone ${zone}" >&2
   response_format="$(mime_type_for_format)"
-  http_request get "/zones/${zone}/records${query}"
+  http_request GET "/zones/${zone}/records${query}"
 }
 
 # Usage: delphyne dynamic <hostname>
@@ -292,7 +293,7 @@ command_dynamic() {
   ip_version="${ip_version:-4}"
 
   echo "Dynamic update for ${hostname}" >&2
-  result="$(http_request post "/dynamic/${hostname}")"
+  result="$(http_request POST "/dynamic/${hostname}")"
   display_message "${result}"
 }
 
@@ -326,7 +327,7 @@ publish_file() {
   fi
 
   response_format='application/json'
-  result="$(http_request put "/zones/${zone}/records?exclude-generated" "@${filename}")"
+  result="$(http_request PUT "/zones/${zone}/records?exclude-generated" "@${filename}")"
   display_message "${result}"
   echo >&2
 }
