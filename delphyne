@@ -297,6 +297,47 @@ command_dynamic() {
   display_message "${result}"
 }
 
+# Send a single record to the API, as a line of a zone file
+# POST adds to the existing records for the host and type; PUT replaces them
+change_record() {
+  local method="${1}"
+  shift
+  if [ "$#" -lt 4 ]; then
+    echo "A zone, host, record type and data must be given." >&2
+    command_help
+  fi
+
+  local zone="${1}"
+  local host="${2}"
+  local type
+  type="$(echo "${3}" | tr '[:lower:]' '[:upper:]')"
+  shift 3
+  local data="$*"
+
+  # TXT data must be quoted in a zone file, so add the quotes if they weren't given
+  if [ "${type}" = 'TXT' ] && [[ "${data}" != \"* ]]; then
+    data="\"${data}\""
+  fi
+
+  request_format='text/dns'
+  response_format='application/json'
+  # The record is sent on stdin, as curl would treat a body starting with '@' (e.g. for host @) as a filename
+  result="$(echo "${host} ${type} ${data}" | http_request "${method}" "/zones/${zone}/records/${host}/${type}" '@-')"
+  display_message "${result}"
+}
+
+# Usage: delphyne add <zone> <host> <type> <data>
+# Description: Add a record, keeping any existing ones
+command_add() {
+  change_record POST "$@"
+}
+
+# Usage: delphyne set <zone> <host> <type> <data>
+# Description: Replace all records of a type for a host
+command_set() {
+  change_record PUT "$@"
+}
+
 parse_zone_filename() {
   local base
   base="$(basename "${1}")"
@@ -471,6 +512,8 @@ main() {
   case "${params[0]:-}" in
     dynamic) command_dynamic "${params[@]:1}";;
     get) command_get "${params[@]:1}";;
+    add) command_add "${params[@]:1}";;
+    set) command_set "${params[@]:1}";;
     publish) command_publish "${params[@]:1}";;
     version) command_version;;
     zones) command_zones;;

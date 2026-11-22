@@ -71,6 +71,28 @@ testDynamicNoHostname() {
   assertContains "${result}" 'No hostname given.'
 }
 
+testAddUrl() {
+  (command_add example.com www a 93.184.216.34) >/dev/null 2>&1
+  assertEquals 'https://api.mythic-beasts.com/dns/v2/zones/example.com/records/www/A' "$(requested_url)"
+}
+
+testSetApexUrl() {
+  (command_set example.com @ MX 10 mx.example.com.) >/dev/null 2>&1
+  assertEquals 'https://api.mythic-beasts.com/dns/v2/zones/example.com/records/@/MX' "$(requested_url)"
+}
+
+testAddTooFewArguments() {
+  result="$(command_add example.com www A 2>&1)"
+  assertEquals 1 $?
+  assertContains "${result}" 'A zone, host, record type and data must be given.'
+}
+
+testSetTooFewArguments() {
+  result="$(command_set 2>&1)"
+  assertEquals 1 $?
+  assertContains "${result}" 'A zone, host, record type and data must be given.'
+}
+
 testGetNoZone() {
   result="$(command_get 2>&1)"
   assertEquals 1 $?

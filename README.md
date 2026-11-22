@@ -35,6 +35,8 @@ Usage
 	 zones                            List the registered zones
 	 get <zone>                       Get a DNS zone
 	 dynamic <hostname>               Point hostname at this machine's public IP
+	 add <zone> <host> <type> <data>  Add a record, keeping any existing ones
+	 set <zone> <host> <type> <data>  Replace all records of a type for a host
 	 publish [<file>]                 Replace zone(s) with contents of file(s)
 	 help                             Show help text
 	 version                          Print version information
@@ -144,6 +146,29 @@ By default, the `dynamic` command will use IPv4 to talk to the Mythic Beasts API
 However, if you pass the `-6` option, it will set an `AAAA` IPv6 address instead.
 The `-4` and `-6` options use the IPv4-only and IPv6-only API hostnames (`ipv4.api.mythic-beasts.com` and
 `ipv6.api.mythic-beasts.com`), so the request fails rather than silently using the other protocol.
+
+
+### Adding and changing records
+
+The `add` and `set` commands change the records of one type for a single host, without publishing a whole zone.
+The host is relative to the zone, using `@` for the top of the zone, and the data is written as it would be in a [zone file].
+
+`add` adds a record, keeping any existing records of that type for the host:
+```
+$ delphyne add example.com www A 93.184.216.34
+=> 1 record added
+```
+
+`set` replaces all the records of that type for the host:
+```
+$ delphyne set example.com @ MX 10 mx.example.com.
+=> 1 record added
+```
+
+The double quotes around TXT data are added for you, if not already given:
+```
+$ delphyne set example.com @ TXT 'v=spf1 -all'
+```
 
 
 ### Publishing zone records
