@@ -43,6 +43,7 @@ Usage
      -j, --json                       Use JSON file format for DNS records
      -r, --rfc1035                    Use RFC1035 (aka bind) zone file format
      -d, --debug                      Turn on debugging of the HTTP request
+     -a, --all                        Include generated records when getting a zone
      -4, --ipv4                       Use IPv4 when talking to the Mythic Beasts API
      -6, --ipv6                       Use IPv6 when talking to the Mythic Beasts API
 
@@ -89,6 +90,10 @@ Getting zone example.com
 @                      900 A     93.184.216.34
 www                    900 A     93.184.216.34
 ```
+
+By default, records generated automatically by Mythic Beasts (such as the `A` and `AAAA` records created from
+`ANAME` records) are left out, so that the output can be edited and published again.
+Use the `-a` option to include them.
 
 To fetch as JSON, use `-j` option. This example pipes the result through [jq] to format it nicely:
 ```
