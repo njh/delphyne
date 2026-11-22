@@ -22,9 +22,9 @@ testDisplayMultipleErrors() {
 
 testDisplayErrorNotJson() {
   result="$(display_error html-headers.txt error.json 2>&1)"
-  assertContains 'ERROR: An error occurred while making request' "${result}"
-  assertContains 'Content-Type: text/html' "${result}"
-  assertContains '"error": "Access denied"' "${result}"
+  assertContains "${result}" '=> An error occurred while making request'
+  assertContains "${result}" 'Content-Type: text/html'
+  assertContains "${result}" '"error": "Access denied"'
 }
 
 testDisplayMessage() {
