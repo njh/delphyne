@@ -212,7 +212,6 @@ Please note that this is not an official tool.
 I am a customer of [Mythic Beasts], not an employee.
 
 * Author:    Nicholas J Humfrey
-* Twitter:   [@njh]
 * Home Page: https://njh.me/
 
 
@@ -220,7 +219,6 @@ I am a customer of [Mythic Beasts], not an employee.
 [bash]:           https://www.gnu.org/software/bash/
 [curl]:           https://curl.haxx.se/
 [bind]:           https://www.isc.org/bind/
-[@njh]:           https://twitter.com/njh
 [Mythic Beasts]:  https://www.mythic-beasts.com/
 [DNS API]:        https://www.mythic-beasts.com/sales/domains/dynamic-dns
 [API Keys]:       https://www.mythic-beasts.com/customer/api-users
